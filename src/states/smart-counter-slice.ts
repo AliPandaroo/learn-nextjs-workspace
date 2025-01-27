@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 interface SmartCounterState {
   count: number;
-  allowNegative: boolean; // Flag negative counts
+  allowNegative: boolean; // Flag negative value
   getCurrentCount: () => number; // ACCESS to the current count without re-rendering
   increment: () => void; // count+1
   decrement: () => void; // count-1
@@ -35,7 +35,8 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
       if (state.allowNegative || state.count > 0) {
         return { count: Number((state.count - 1).toFixed(2)) };
       }
-      return state; // Prevent decrementing below zero if not allowed
+      console.log("The value is minimum!");
+      return state;
     }),
 
   incrementTo: (target) => {
@@ -45,7 +46,7 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
           return { count: Math.min(state.count + 1, target) };
         } else {
           clearInterval(interval);
-          console.log("CANNOT REACH TO TARGET");
+          console.log("CANNOT REACH TO TARGET!");
           return state;
         }
       });
@@ -62,7 +63,7 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
           return { count: Math.max(state.count - 1, target) };
         } else {
           clearInterval(interval);
-          console.log("CANNOT REACH TO TARGET");
+          console.log("CANNOT REACH TO TARGET!");
           return state;
         }
       });
@@ -77,7 +78,8 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
       if (state.allowNegative || state.count > value) {
         return { count: Number((state.count - value).toFixed(2)) };
       }
-      return state; // Prevent decrementing below zero if not allowed
+      console.log("The value is minimum!");
+      return state;
     }),
 
   multipleBy: (value) =>
