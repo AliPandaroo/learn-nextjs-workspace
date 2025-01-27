@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 interface SmartCounterState {
   count: number;
+  allowNegative: boolean; // Flag negative counts
   getCurrentCount: () => number; // ACCESS to the current count without re-rendering
   increment: () => void; // count+1
   decrement: () => void; // count-1
@@ -14,27 +15,33 @@ interface SmartCounterState {
   moduloBy: (value: number) => void; // remaining of count/value
   calculatePercent: (percent: number) => number; // percent of the count
   setCountByPercent: (percent: number) => void; // SET count to a specific percent of its current value
-  asyncAction: (action: () => void, delay?: number) => Promise<void>; // ASYNCNOUSLY execute an action after a delay
-  truncate: () => void; // MAKE count an intiger
+  asyncAction: (action: () => void, delay?: number) => Promise<void>; // ASYNCHRONOUSLY execute an action after a delay
+  truncate: () => void; // MAKE count an integer
 }
 
 export const useSmartCounterState = create<SmartCounterState>((set) => ({
   count: 0,
+  allowNegative: true,
 
   getCurrentCount: (): number => {
-    // PREVENT TO USE "set()" cause triggers to re-render and reflect the updated value
-    return useSmartCounterState.getState().count as number;
+    return useSmartCounterState.getState().count;
   },
 
   increment: () =>
     set((state) => ({ count: Number((state.count + 1).toFixed(2)) })),
+
   decrement: () =>
-    set((state) => ({ count: Number((state.count - 1).toFixed(2)) })),
+    set((state) => {
+      if (state.allowNegative || state.count > 0) {
+        return { count: Number((state.count - 1).toFixed(2)) };
+      }
+      return state; // Prevent decrementing below zero if not allowed
+    }),
 
   incrementTo: (target) => {
     const interval = setInterval(() => {
       set((state) => {
-        if (state.count < target) {
+        if ((state.allowNegative || state.count >= 0) && state.count < target) {
           return { count: Math.min(state.count + 1, target) };
         } else {
           clearInterval(interval);
@@ -44,10 +51,14 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
       });
     }, 200);
   },
+
   decrementTo: (target) => {
     const interval = setInterval(() => {
       set((state) => {
-        if (state.count > target) {
+        if (
+          (state.allowNegative || state.count > target) &&
+          state.count > target
+        ) {
           return { count: Math.max(state.count - 1, target) };
         } else {
           clearInterval(interval);
@@ -60,13 +71,21 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
 
   incrementBy: (value) =>
     set((state) => ({ count: Number((state.count + value).toFixed(2)) })),
+
   decrementBy: (value) =>
-    set((state) => ({ count: Number((state.count - value).toFixed(2)) })),
+    set((state) => {
+      if (state.allowNegative || state.count > value) {
+        return { count: Number((state.count - value).toFixed(2)) };
+      }
+      return state; // Prevent decrementing below zero if not allowed
+    }),
 
   multipleBy: (value) =>
     set((state) => ({ count: Number((state.count * value).toFixed(2)) })),
+
   dividedBy: (value) =>
     set((state) => ({ count: Number((state.count / value).toFixed(2)) })),
+
   moduloBy: (value) =>
     set((state) => ({ count: Number((state.count % value).toFixed(2)) })),
 
@@ -77,6 +96,7 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
     const newCount = (percent / 100) * currentCount;
     return Number(newCount.toFixed(2));
   },
+
   setCountByPercent: (percent) =>
     set((state) => {
       const newCount = (state.count / 100) * percent;
