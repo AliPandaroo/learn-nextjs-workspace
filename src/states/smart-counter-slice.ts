@@ -40,34 +40,53 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
     }),
 
   incrementTo: (target) => {
+    const incrementCount = (currentCount: number) =>
+      Math.min(currentCount + 1, target);
+
+    const shouldContinueIncrementing = (
+      count: number,
+      allowNegative: boolean
+    ) => (allowNegative || count >= 0) && count < target;
+
+    const handleIncrement = (state: SmartCounterState) => {
+      const { count, allowNegative } = state;
+      if (shouldContinueIncrementing(count, allowNegative)) {
+        return { count: incrementCount(count) };
+      } else {
+        console.log("CANNOT REACH TO TARGET!");
+        clearInterval(interval);
+        return state;
+      }
+    };
+
     const interval = setInterval(() => {
-      set((state) => {
-        if ((state.allowNegative || state.count >= 0) && state.count < target) {
-          return { count: Math.min(state.count + 1, target) };
-        } else {
-          clearInterval(interval);
-          console.log("CANNOT REACH TO TARGET!");
-          return state;
-        }
-      });
+      set((state) => handleIncrement(state));
     }, 200);
   },
 
   decrementTo: (target) => {
+    const decrementCount = (currentCount: number) =>
+      Math.max(currentCount - 1, target);
+
+    const shouldContinueDecrementing = (
+      count: number,
+      allowNegative: boolean
+    ) => (allowNegative || count <= target) && count > target;
+
+    const handleDecrement = (state: SmartCounterState) => {
+      const { count, allowNegative } = state;
+      if (shouldContinueDecrementing(count, allowNegative)) {
+        return { count: decrementCount(count) };
+      } else {
+        console.log("CANNOT REACH TO TARGET!");
+        clearInterval(interval);
+        return state;
+      }
+    };
+
     const interval = setInterval(() => {
-      set((state) => {
-        if (
-          (state.allowNegative || state.count > target) &&
-          state.count > target
-        ) {
-          return { count: Math.max(state.count - 1, target) };
-        } else {
-          clearInterval(interval);
-          console.log("CANNOT REACH TO TARGET!");
-          return state;
-        }
-      });
-    }, 100);
+      set((state) => handleDecrement(state));
+    }, 200);
   },
 
   incrementBy: (value) =>
@@ -85,8 +104,15 @@ export const useSmartCounterState = create<SmartCounterState>((set) => ({
   multipleBy: (value) =>
     set((state) => ({ count: Number((state.count * value).toFixed(2)) })),
 
-  dividedBy: (value) =>
-    set((state) => ({ count: Number((state.count / value).toFixed(2)) })),
+  dividedBy: (value) => {
+    if (value === 0) {
+      console.error("Cannot divide by zero");
+      return; // Or handle this case as needed
+    }
+    return set((state) => ({
+      count: Number((state.count / value).toFixed(2)),
+    }));
+  },
 
   moduloBy: (value) =>
     set((state) => ({ count: Number((state.count % value).toFixed(2)) })),
