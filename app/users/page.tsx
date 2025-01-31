@@ -1,7 +1,7 @@
 "use client";
 import DataTable from "@/src/components/DataTable";
-import { useDataTableState } from "@/src/states/data-table-slice";
-import { useDynamicLoadingState } from "@/src/states/dynamic-loading-slice";
+import { useDataTableState } from "@/src/store/data-table-slice";
+import { useDynamicLoadingState } from "@/src/store/dynamic-loading-slice";
 import React, { useEffect } from "react";
 
 const UsersPage = () => {

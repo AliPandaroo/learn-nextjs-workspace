@@ -2,7 +2,7 @@
 import React from "react";
 import NumberFlow from "@number-flow/react";
 
-import { useSmartCounterState } from "../states/smart-counter-slice";
+import { useSmartCounterState } from "../store/smart-counter-slice";
 
 export const SmartCounter: React.FC = () => {
   const {

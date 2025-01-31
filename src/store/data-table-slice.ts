@@ -55,8 +55,9 @@ export const useDataTableState = create<DataTableState>()(
     filters: [],
 
     columns: [],
-    setColumns: (columns) =>
-      set((state: DataTableState) => ({ columns }), undefined, "column/set"),
+    setColumns: (columns) => {
+      set((state: DataTableState) => ({ columns }), undefined, "column/set");
+    },
     fetchedData: (data: DataItem[]) => {
       set(
         (state: DataTableState) => ({ fetchedData: data }),
