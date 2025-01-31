@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import {
   useEditProfileState, // SLICE
   ProfileFields, // TYPE
-} from "../states/edit-profile-slice";
+} from "../store/edit-profile-slice";
 
 const EditProfileForm = () => {
   const {
