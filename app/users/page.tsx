@@ -1,6 +1,7 @@
 "use client";
 import DataTable from "@/src/components/DataTable";
 import { useDataTableState } from "@/src/states/data-table-slice";
+import { useDynamicLoadingState } from "@/src/states/dynamic-loading-slice";
 import React, { useEffect } from "react";
 
 const UsersPage = () => {
@@ -20,6 +21,28 @@ const UsersPage = () => {
     resetTable,
   } = useDataTableState();
 
+  const { loadingStates, setLoading, clearLoading } = useDynamicLoadingState();
+
+  async function GetUsers() {
+    setLoading("users_list", true);
+    setLoading("payments_list", true);
+    setLoading("orders_list", true);
+    setLoading("order_list", true);
+
+    try {
+      await fetchData(
+        "https://679b599233d3168463238bab.mockapi.io/api/v1/users",
+        false
+      );
+    } catch (error) {
+    } finally {
+      console.log("Data fetched successfully!");
+      setLoading("users_list", false);
+      clearLoading("orders_list");
+      clearLoading(["users_list", "payments_list"]);
+    }
+  }
+
   useEffect(() => {
     setColumns([
       "ID",
@@ -31,10 +54,7 @@ const UsersPage = () => {
       "createdAt",
     ]);
     console.log({ columns: useDataTableState.getState().columns });
-    fetchData(
-      "https://679b599233d3168463238bab.mockapi.io/api/v1/users",
-      false
-    );
+    GetUsers();
   }, [fetchData]);
 
   return (
